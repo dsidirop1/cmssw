@@ -8,13 +8,13 @@ from TopQuarkAnalysis.TopEventProducers.tqafInputFiles_cff import relValTTbar
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
             #relValTTbar
-            '/store/relval/CMSSW_11_0_0_pre4/RelValProdTTbar/AODSIM/106X_mcRun1_realistic_v3-v1/20000/26A4F099-D3A0-0C47-9E05-408C49CFD404.root'
+            '/store/mc/RunIISummer20UL16wmLHEGENAPV/TT_Mtt-1000toInf_TuneCP5_13TeVpowheg-pythia8/GEN/106X_mcRun2_asymptotic_preVFP_v8-v1/130000/B7D310D0-90A4-0F41-B576-53ADD868D995.root'
         )
 )
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(1000)
 )
 ## configure process options
 process.options = cms.untracked.PSet(
