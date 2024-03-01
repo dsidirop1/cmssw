@@ -44,6 +44,12 @@ namespace mkfit {
       m_fitters.populate(n_thr - m_fitters.size());
       m_finders.populate(n_thr - m_finders.size());
     }
+
+    void clear() {
+      m_cloners.clear();
+      m_fitters.clear();
+      m_finders.clear();
+    }
   };
 
   CMS_SA_ALLOW ExecutionContext g_exe_ctx;
@@ -166,6 +172,7 @@ namespace mkfit {
   std::unique_ptr<MkBuilder> MkBuilder::make_builder(bool silent) { return std::make_unique<MkBuilder>(silent); }
 
   void MkBuilder::populate() { g_exe_ctx.populate(Config::numThreadsFinder); }
+  void MkBuilder::clear() { g_exe_ctx.clear(); }
 
   std::pair<int, int> MkBuilder::max_hits_layer(const EventOfHits &eoh) const {
     int maxN = 0;
@@ -405,7 +412,7 @@ namespace mkfit {
   //------------------------------------------------------------------------------
 
   void MkBuilder::seed_post_cleaning(TrackVec &tv) {
-    if (Const::nan_n_silly_check_seeds) {
+    if constexpr (Const::nan_n_silly_check_seeds) {
       int count = 0;
 
       for (int i = 0; i < (int)tv.size(); ++i) {
@@ -414,7 +421,7 @@ namespace mkfit {
                                           "Post-cleaning seed silly value check and fix");
         if (silly) {
           ++count;
-          if (Const::nan_n_silly_remove_bad_seeds) {
+          if constexpr (Const::nan_n_silly_remove_bad_seeds) {
             // XXXX MT
             // Could do somethin smarter here: set as Stopped ?  check in seed cleaning ?
             tv.erase(tv.begin() + i);
@@ -662,7 +669,7 @@ namespace mkfit {
             seed_cand_vec.push_back(std::pair<int, int>(iseed, ic));
             ccand[ic].resetOverlaps();
 
-            if (Const::nan_n_silly_check_cands_every_layer) {
+            if constexpr (Const::nan_n_silly_check_cands_every_layer) {
               if (ccand[ic].hasSillyValues(Const::nan_n_silly_print_bad_cands_every_layer,
                                            Const::nan_n_silly_fixup_bad_cands_every_layer,
                                            "Per layer silly check"))
@@ -676,7 +683,7 @@ namespace mkfit {
       }
     }
 
-    if (Const::nan_n_silly_check_cands_every_layer && silly_count > 0) {
+    if constexpr (Const::nan_n_silly_check_cands_every_layer && silly_count > 0) {
       m_nan_n_silly_per_layer_count += silly_count;
     }
 
@@ -1103,7 +1110,7 @@ namespace mkfit {
         // mkfndr->copyOutParErr(eoccs.refCandidates_nc(), end - itrack, true);
 
         // For prop-to-plane propagate from the last hit, not layer center.
-        if (Config::usePropToPlane) {
+        if constexpr (Config::usePropToPlane) {
           mkfndr->inputTracksAndHitIdx(eoccs.refCandidates(), seed_cand_idx, itrack, end, false);
         }
 
