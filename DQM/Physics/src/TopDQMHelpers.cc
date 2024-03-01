@@ -1,5 +1,7 @@
 #include "DQM/Physics/interface/TopDQMHelpers.h"
 
+using namespace std;
+
 Calculate::Calculate(int maxNJets, double wMass)
     : failed_(false),
       maxNJets_(maxNJets),
