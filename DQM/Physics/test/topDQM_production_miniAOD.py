@@ -15,7 +15,8 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase2_realistic', '')
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring())
 process.source.skipEvents = cms.untracked.uint32(0)
-process.source.fileNames = ['/store/mc/Run3Winter24MiniAOD/TT_TuneCP5_13p6TeV_powheg-pythia8/MINIAODSIM/133X_mcRun3_2024_realistic_v8-v2/2540000/01f73297-b0d8-4458-a1c0-34a17148ca4a.root'] 
+process.source.fileNames = ['/store/relval/CMSSW_14_1_0_pre4/RelValTTbar_14TeV/MINIAODSIM/PU_140X_mcRun3_2024_realistic_v11_STD_2024_PU-v1/2580000/d85213b7-efd1-4c6b-b414-d576d7256678.root']
+#process.source.fileNames = ['/store/mc/Run3Winter24MiniAOD/TT_TuneCP5_13p6TeV_powheg-pythia8/MINIAODSIM/133X_mcRun3_2024_realistic_v8-v2/2540000/01f73297-b0d8-4458-a1c0-34a17148ca4a.root'] 
 
 #process.source.fileNames = ['/store/relval/CMSSW_11_1_0_pre2/RelValTTbar_14TeV/MINIAODSIM/110X_mcRun3_2021_realistic_v6-v1/20000/F594311A-0167-1A41-9984-753E9AFB1279.root']
 
