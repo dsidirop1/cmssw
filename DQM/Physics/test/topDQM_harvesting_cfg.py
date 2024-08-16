@@ -37,6 +37,7 @@ process.dqmSaver.saveByRun      = cms.untracked.int32( -1)
 process.dqmSaver.saveAtJobEnd   = cms.untracked.bool(True)
 process.dqmSaver.forceRunNumber = cms.untracked.int32(  1)
 process.dqmSaver.workflow       = cms.untracked.string('/TopVal/CMSSW_14_1_0_pre6/RECO') ## adapt apropriately
+process.dqmSaver.workflow       = cms.untracked.string('/TopVal/CMSSW_14_1_0_pre6/RECO') ## adapt apropriately
 <<<<<<< HEAD
 process.dqmSaver.workflow       = cms.untracked.string('/TopVal/CMSSW_14_1_0_pre7/RECO') ## adapt apropriately
 =======
