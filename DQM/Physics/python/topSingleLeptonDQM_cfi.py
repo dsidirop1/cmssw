@@ -11,17 +11,24 @@ tightJetCut = "(chargedHadronEnergyFraction()>0 && chargedMultiplicity()>0 && ch
 #Loose muon selection
 looseMuonCut  = "((isGlobalMuon || isTrackerMuon) && isPFMuon)"
 looseIsoCut   = "((pfIsolationR04.sumChargedHadronPt + max(0., pfIsolationR04.sumNeutralHadronEt + pfIsolationR04.sumPhotonEt - 0.5 * pfIsolationR04.sumPUPt) ) / pt < 0.25)"
+<<<<<<< HEAD
 looseMuonCut  = "((isGlobalMuon || isTrackerMuon) && isPFMuon)"
 looseIsoCut   = "((pfIsolationR04.sumChargedHadronPt + max(0., pfIsolationR04.sumNeutralHadronEt + pfIsolationR04.sumPhotonEt - 0.5 * pfIsolationR04.sumPUPt) ) / pt < 0.25)"
 
 #Medium muon selection. Also requires either good global muon or tight segment compatibility
 mediumMuonCut = looseMuonCut + " innerTrack.validFraction > 0.8"
 mediumMuonCut = looseMuonCut + " innerTrack.validFraction > 0.8"
+=======
+
+#Medium muon selection. Also requires either good global muon or tight segment compatibility
+mediumMuonCut = looseMuonCut + " innerTrack.validFraction > 0.8"
+>>>>>>> b276422bf9d (TopDQM lepton input)
 
 #Tight muon selection. Lacks distance to primary vertex variables, dz<0.5, dxy < 0.2. Now done at .cc
 tightMuonCut  = "isGlobalMuon && isPFMuon && globalTrack.normalizedChi2 < 10. && globalTrack.hitPattern.numberOfValidMuonHits > 0 && " + \
                "numberOfMatchedStations > 1 && innerTrack.hitPattern.numberOfValidPixelHits > 0 && innerTrack.hitPattern.trackerLayersWithMeasurement > 5 "
 tightIsoCut   = "(pfIsolationR04.sumChargedHadronPt + max(0., pfIsolationR04.sumNeutralHadronEt + pfIsolationR04.sumPhotonEt - 0.5 * pfIsolationR04.sumPUPt) ) / pt < 0.15"
+<<<<<<< HEAD
 tightMuonCut  = "isGlobalMuon && isPFMuon && globalTrack.normalizedChi2 < 10. && globalTrack.hitPattern.numberOfValidMuonHits > 0 && " + \
                "numberOfMatchedStations > 1 && innerTrack.hitPattern.numberOfValidPixelHits > 0 && innerTrack.hitPattern.trackerLayersWithMeasurement > 5 "
 tightIsoCut   = "(pfIsolationR04.sumChargedHadronPt + max(0., pfIsolationR04.sumNeutralHadronEt + pfIsolationR04.sumPhotonEt - 0.5 * pfIsolationR04.sumPUPt) ) / pt < 0.15"
@@ -32,6 +39,13 @@ looseEleCut = "((full5x5_sigmaIetaIeta() < 0.011 && superCluster().isNonnull() &
 
 tightEleCut = "((full5x5_sigmaIetaIeta() < 0.00998 && superCluster().isNonnull() && superCluster().seed().isNonnull() && (deltaEtaSuperClusterTrackAtVtx() - superCluster().eta() + superCluster().seed().eta()) < 0.00308  && abs(deltaPhiSuperClusterTrackAtVtx()) < 0.0816 && hadronicOverEm() < 0.0414 && abs(1.0 - eSuperClusterOverP())*1.0/ecalEnergy() < 0.0129 && gsfTrack.hitPattern().numberOfLostHits('MISSING_INNER_HITS') <= 1 && abs(superCluster().eta()) < 1.479) ||  (full5x5_sigmaIetaIeta() < 0.0292 && superCluster().isNonnull() && superCluster().seed().isNonnull() && (deltaEtaSuperClusterTrackAtVtx() - superCluster().eta() + superCluster().seed().eta()) < 0.00605 && abs(deltaPhiSuperClusterTrackAtVtx()) < 0.0394  && hadronicOverEm() < 0.0641  && abs(1.0 - eSuperClusterOverP())*1.0/ecalEnergy() <	0.0129 && gsfTrack.hitPattern().numberOfLostHits('MISSING_INNER_HITS') <= 1 && abs(superCluster().eta()) > 1.479))"
 tightEleCut = "((full5x5_sigmaIetaIeta() < 0.00998 && superCluster().isNonnull() && superCluster().seed().isNonnull() && (deltaEtaSuperClusterTrackAtVtx() - superCluster().eta() + superCluster().seed().eta()) < 0.00308  && abs(deltaPhiSuperClusterTrackAtVtx()) < 0.0816 && hadronicOverEm() < 0.0414 && abs(1.0 - eSuperClusterOverP())*1.0/ecalEnergy() < 0.0129 && gsfTrack.hitPattern().numberOfLostHits('MISSING_INNER_HITS') <= 1 && abs(superCluster().eta()) < 1.479) ||  (full5x5_sigmaIetaIeta() < 0.0292 && superCluster().isNonnull() && superCluster().seed().isNonnull() && (deltaEtaSuperClusterTrackAtVtx() - superCluster().eta() + superCluster().seed().eta()) < 0.00605 && abs(deltaPhiSuperClusterTrackAtVtx()) < 0.0394  && hadronicOverEm() < 0.0641  && abs(1.0 - eSuperClusterOverP())*1.0/ecalEnergy() <	0.0129 && gsfTrack.hitPattern().numberOfLostHits('MISSING_INNER_HITS') <= 1 && abs(superCluster().eta()) > 1.479))"
+=======
+
+#Electron selections
+looseEleCut = "(( full5x5_sigmaIetaIeta() < 0.011 && superCluster().isNonnull() && superCluster().seed().isNonnull() && (deltaEtaSuperClusterTrackAtVtx() - superCluster().eta() + superCluster().seed().eta()) < 0.00477 && abs(deltaPhiSuperClusterTrackAtVtx()) < 0.222 && hadronicOverEm() < 0.298 && abs(1.0 - eSuperClusterOverP())*1.0/ecalEnergy() < 0.241 && gsfTrack.hitPattern().numberOfLostHits('MISSING_INNER_HITS') <= 1 && abs(superCluster().eta()) < 1.479) || (full5x5_sigmaIetaIeta() < 0.0314 && superCluster().isNonnull() && superCluster().seed().isNonnull() && (deltaEtaSuperClusterTrackAtVtx() - superCluster().eta() + superCluster().seed().eta()) < 0.00868 && abs(deltaPhiSuperClusterTrackAtVtx()) < 0.213 && hadronicOverEm() < 0.101  && abs(1.0 - eSuperClusterOverP())*1.0/ecalEnergy() < 0.14 && gsfTrack.hitPattern().numberOfLostHits('MISSING_INNER_HITS') <= 1 && abs(superCluster().eta()) > 1.479))"
+
+tightEleCut = "((full5x5_sigmaIetaIeta() < 0.00998 && superCluster().isNonnull() && superCluster().seed().isNonnull() && (deltaEtaSuperClusterTrackAtVtx() - superCluster().eta() + superCluster().seed().eta()) < 0.00308  && abs(deltaPhiSuperClusterTrackAtVtx()) < 0.0816 && hadronicOverEm() < 0.0414 && abs(1.0 - eSuperClusterOverP())*1.0/ecalEnergy() < 0.0129 && gsfTrack.hitPattern().numberOfLostHits('MISSING_INNER_HITS') <= 1 && abs(superCluster().eta()) < 1.479) ||  (full5x5_sigmaIetaIeta() < 0.0292 && superCluster().isNonnull() && superCluster().seed().isNonnull() && (deltaEtaSuperClusterTrackAtVtx() - superCluster().eta() + superCluster().seed().eta()) < 0.00605 && abs(deltaPhiSuperClusterTrackAtVtx()) < 0.0394  && hadronicOverEm() < 0.0641  && abs(1.0 - eSuperClusterOverP())*1.0/ecalEnergy() <	0.0129 && gsfTrack.hitPattern().numberOfLostHits('MISSING_INNER_HITS') <= 1 && abs(superCluster().eta()) > 1.479))"
+>>>>>>> b276422bf9d (TopDQM lepton input)
 
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
@@ -48,8 +62,11 @@ topSingleMuonMediumDQM = DQMEDAnalyzer('TopSingleLeptonDQM',
     sources = cms.PSet(
       muons = cms.InputTag("muons"),
       elecs = cms.InputTag("gedGsfElectrons"),
+<<<<<<< HEAD
       muons = cms.InputTag("muons"),
       elecs = cms.InputTag("gedGsfElectrons"),
+=======
+>>>>>>> b276422bf9d (TopDQM lepton input)
       jets  = cms.InputTag("ak4PFJetsCHS"),
       mets  = cms.VInputTag("pfMet"),
       pvs   = cms.InputTag("offlinePrimaryVertices")
@@ -63,7 +80,10 @@ topSingleMuonMediumDQM = DQMEDAnalyzer('TopSingleLeptonDQM',
     ),
     elecExtras = cms.PSet(
       select     = cms.string(tightEleCut + "& pt>20 & abs(eta)<2.5 & (abs(superCluster().eta()) <= 1.4442 || abs(superCluster().eta()) >= 1.5660)"),
+<<<<<<< HEAD
       select     = cms.string(tightEleCut + "& pt>20 & abs(eta)<2.5 & (abs(superCluster().eta()) <= 1.4442 || abs(superCluster().eta()) >= 1.5660)"),
+=======
+>>>>>>> b276422bf9d (TopDQM lepton input)
 			rho = cms.InputTag("fixedGridRhoFastjetAll"),
     ),                                     
     muonExtras = cms.PSet(
@@ -99,7 +119,10 @@ topSingleMuonMediumDQM = DQMEDAnalyzer('TopSingleLeptonDQM',
     cms.PSet(
       label  = cms.string("muons:step0"),
       src    = cms.InputTag("muons"),
+<<<<<<< HEAD
       src    = cms.InputTag("muons"),
+=======
+>>>>>>> b276422bf9d (TopDQM lepton input)
       select = cms.string(tightMuonCut + " && pt>20 & abs(eta)<2.4"),     
       min    = cms.int32(1),
     ),
@@ -130,8 +153,11 @@ topSingleElectronMediumDQM = DQMEDAnalyzer('TopSingleLeptonDQM',
     sources = cms.PSet(
       muons = cms.InputTag("muons"),
       elecs = cms.InputTag("gedGsfElectrons"),
+<<<<<<< HEAD
       muons = cms.InputTag("muons"),
       elecs = cms.InputTag("gedGsfElectrons"),
+=======
+>>>>>>> b276422bf9d (TopDQM lepton input)
       jets  = cms.InputTag("ak4PFJetsCHS"),
       mets  = cms.VInputTag("pfMet"),
       pvs   = cms.InputTag("offlinePrimaryVertices")
@@ -178,9 +204,12 @@ topSingleElectronMediumDQM = DQMEDAnalyzer('TopSingleLeptonDQM',
       src   = cms.InputTag("gedGsfElectrons"),
       select = cms.string("pt>20 & abs(eta)<2.5 & (abs(superCluster().eta()) <= 1.4442 || abs(superCluster().eta()) >= 1.5660) &&" + tightEleCut),
  #     select = cms.string("pt>30 & abs(eta)<2.5 & abs(gsfTrack.d0)<0.02 & gsfTrack.hitPattern().numberOfLostHits('MISSING_INNER_HITS') <= 0 & (abs(superCluster.eta) <= 1.4442 || abs(superCluster.eta) >= 1.5660) & " + EletightIsoCut),
+<<<<<<< HEAD
       src   = cms.InputTag("gedGsfElectrons"),
       select = cms.string("pt>20 & abs(eta)<2.5 & (abs(superCluster().eta()) <= 1.4442 || abs(superCluster().eta()) >= 1.5660) &&" + tightEleCut),
  #     select = cms.string("pt>30 & abs(eta)<2.5 & abs(gsfTrack.d0)<0.02 & gsfTrack.hitPattern().numberOfLostHits('MISSING_INNER_HITS') <= 0 & (abs(superCluster.eta) <= 1.4442 || abs(superCluster.eta) >= 1.5660) & " + EletightIsoCut),
+=======
+>>>>>>> b276422bf9d (TopDQM lepton input)
       min = cms.int32(1),
     ),
     cms.PSet(
