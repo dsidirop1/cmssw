@@ -142,9 +142,9 @@ public:
   double massBTopQuark(const std::vector<reco::Jet>& jets, std::vector<double> VbtagWP, double btagWP_);
 
   /// calculate W boson transverse mass estimate
-  double tmassWBoson(reco::RecoCandidate* lep, const reco::PFMET& met, const reco::Jet& b);
+  double tmassWBoson(reco::RecoCandidate* lep, const reco::MET& met, const reco::Jet& b);
   /// calculate top quark transverse mass estimate
-  double tmassTopQuark(reco::RecoCandidate* lep, const reco::PFMET& met, const reco::Jet& b);
+  double tmassTopQuark(reco::RecoCandidate* lep, const reco::MET& met, const reco::Jet& b);
 
 private:
   /// do the calculation; this is called only once per event by the first
@@ -154,7 +154,7 @@ private:
   /// do the calculation of the t-quark mass with one b-jet
   void operator2(const std::vector<reco::Jet>&, std::vector<double>, double);
   /// do the calculation of the transverse top and W masses
-  void operator()(const reco::Jet& bJet, reco::RecoCandidate* lepton, const reco::PFMET& met);
+  void operator()(const reco::Jet& bJet, reco::RecoCandidate* lepton, const reco::MET& met);
 
 private:
   /// indicate failed associations
