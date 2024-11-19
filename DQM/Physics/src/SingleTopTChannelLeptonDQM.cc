@@ -4,6 +4,7 @@
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -44,11 +45,11 @@ namespace SingleTopTChannelLepton {
         logged_(0) {
     // sources have to be given; this PSet is not optional
     edm::ParameterSet sources = cfg.getParameter<edm::ParameterSet>("sources");
-    muons_ = iC.consumes<edm::View<reco::PFCandidate>>(sources.getParameter<edm::InputTag>("muons"));
-    elecs_ = iC.consumes<edm::View<reco::PFCandidate>>(sources.getParameter<edm::InputTag>("elecs"));
+    muons_ = iC.consumes<edm::View<reco::Muon>>(sources.getParameter<edm::InputTag>("muons"));
+    elecs_ = iC.consumes<edm::View<reco::GsfElectron>>(sources.getParameter<edm::InputTag>("elecs"));
     jets_ = iC.consumes<edm::View<reco::Jet>>(sources.getParameter<edm::InputTag>("jets"));
     for (edm::InputTag const& tag : sources.getParameter<std::vector<edm::InputTag>>("mets"))
-      mets_.push_back(iC.consumes<edm::View<reco::MET>>(tag));
+      mets_.push_back(iC.consumes<edm::View<reco::PFMET>>(tag));
     pvs_ = iC.consumes<edm::View<reco::Vertex>>(sources.getParameter<edm::InputTag>("pvs"));
     // electronExtras are optional; they may be omitted or
     // empty
@@ -61,7 +62,7 @@ namespace SingleTopTChannelLepton {
       // select is optional; in case it's not found no
       // selection will be applied
       if (elecExtras.existsAs<std::string>("select")) {
-        elecSelect_ = std::make_unique<StringCutObjectSelector<reco::PFCandidate>>(
+        elecSelect_ = std::make_unique<StringCutObjectSelector<reco::GsfElectron>>(
             elecExtras.getParameter<std::string>("select"));
       }
 
@@ -92,13 +93,13 @@ namespace SingleTopTChannelLepton {
       // select is optional; in case it's not found no
       // selection will be applied
       if (muonExtras.existsAs<std::string>("select")) {
-        muonSelect_ = std::make_unique<StringCutObjectSelector<reco::PFCandidate>>(
+        muonSelect_ = std::make_unique<StringCutObjectSelector<reco::Muon>>(
             muonExtras.getParameter<std::string>("select"));
       }
       // isolation is optional; in case it's not found no
       // isolation will be applied
       if (muonExtras.existsAs<std::string>("isolation")) {
-        muonIso_ = std::make_unique<StringCutObjectSelector<reco::PFCandidate>>(
+        muonIso_ = std::make_unique<StringCutObjectSelector<reco::Muon>>(
             muonExtras.getParameter<std::string>("isolation"));
       }
     }
@@ -138,10 +139,10 @@ namespace SingleTopTChannelLepton {
       // corresponding working points
       includeBTag_ = jetExtras.existsAs<edm::ParameterSet>("jetBTaggers");
       if (includeBTag_) {
-        edm::ParameterSet btagCSV =
-            jetExtras.getParameter<edm::ParameterSet>("jetBTaggers").getParameter<edm::ParameterSet>("cvsVertex");
-        btagCSV_ = iC.consumes<reco::JetTagCollection>(btagCSV.getParameter<edm::InputTag>("label"));
-        btagCSVWP_ = btagCSV.getParameter<double>("workingPoint");
+        edm::ParameterSet btagPNet =
+        jetExtras.getParameter<edm::ParameterSet>("jetBTaggers").getParameter<edm::ParameterSet>("cvsVertex");
+        btagPNet_ = iC.consumes<reco::JetTagCollection>(btagPNet.getParameter<edm::InputTag>("label"));
+        btagPNetWP_ = btagPNet.getParameter<double>("workingPoint");
       }
     }
 
@@ -281,9 +282,9 @@ namespace SingleTopTChannelLepton {
     hists_["elecPhIso_"] = ibooker.book1D("ElectronPhIsoComp", "Photon_{IsoComponent}(e tightId)", 50, 0., 5.);
 
     // multiplicity for combined secondary vertex
-    hists_["jetMultBCSVM_"] = ibooker.book1D("JetMultBCSVM", "N_{30}(CSVM)", 10, 0., 10.);
+    hists_["jetMultBPNetM_"] = ibooker.book1D("JetMultBPNetM", "N_{30}(PNetM)", 10, 0., 10.);
     // btag discriminator for combined secondary vertex
-    hists_["jetBCSV_"] = ibooker.book1D("JetDiscCSV", "BJet Disc_{CSV}(JET)", 100, -1., 2.);
+    hists_["jetBPNet_"] = ibooker.book1D("JetDiscPNet", "BJet Disc_{PNet}(JET)", 100, -1., 2.);
     // pt of the 1. leading jet (uncorrected)
     // hists_["jet1PtRaw_"] = ibooker.book1D("Jet1PtRaw", "pt_{Raw}(jet1)", 60, 0., 300.);
     // pt of the 2. leading jet (uncorrected)
@@ -343,7 +344,7 @@ namespace SingleTopTChannelLepton {
   */
 
     // fill monitoring plots for electrons
-    edm::Handle<edm::View<reco::PFCandidate>> elecs;
+    edm::Handle<edm::View<reco::GsfElectron>> elecs;
     reco::GsfElectron e;
     edm::Handle<double> _rhoHandle;
     event.getByLabel(rhoTag, _rhoHandle);
@@ -360,23 +361,21 @@ namespace SingleTopTChannelLepton {
     }
     // loop electron collection
     unsigned int eMult = 0, eMultIso = 0;
-    std::vector<const reco::PFCandidate*> isoElecs;
+    std::vector<const reco::GsfElectron*> isoElecs;
 
-    for (edm::View<reco::PFCandidate>::const_iterator elec = elecs->begin(); elec != elecs->end(); ++elec) {
-      if (elec->gsfElectronRef().isNull()) {
-        continue;
-      }
-      reco::GsfElectronRef gsf_el = elec->gsfElectronRef();
+    for (edm::View<reco::GsfElectron>::const_iterator elec = elecs->begin(); elec != elecs->end(); ++elec) {
+
+      //reco::GsfElectronRef gsf_el = elec->gsfElectronRef();
       // restrict to electrons with good electronId
-      if (electronId_.isUninitialized()
-              ? true
-              : ((double)(*electronId)[gsf_el] >=
-                 eidCutValue_)) {  //This Electron Id is not currently used, but we can keep this for future needs
+      if (electronId_.isUninitialized()){
+              /*? true
+              : ((double)(*electronId)[elec] >=
+                 eidCutValue_)) {  //This Electron Id is not currently used, but we can keep this for future needs*/
         if (!elecSelect_ || (*elecSelect_)(*elec)) {
-          double el_ChHadIso = gsf_el->pfIsolationVariables().sumChargedHadronPt;
-          double el_NeHadIso = gsf_el->pfIsolationVariables().sumNeutralHadronEt;
-          double el_PhIso = gsf_el->pfIsolationVariables().sumPhotonEt;
-          double absEta = std::abs(gsf_el->superCluster()->eta());
+          double el_ChHadIso = elec->pfIsolationVariables().sumChargedHadronPt;
+          double el_NeHadIso = elec->pfIsolationVariables().sumNeutralHadronEt;
+          double el_PhIso = elec->pfIsolationVariables().sumPhotonEt;
+          double absEta = std::abs(elec->superCluster()->eta());
 
           //Effective Area computation
           double eA = 0;
@@ -396,7 +395,7 @@ namespace SingleTopTChannelLepton {
             eA = 0.2393;
 
           double rho = _rhoHandle.isValid() ? (float)(*_rhoHandle) : 0;
-          double el_pfRelIso = (el_ChHadIso + max(0., el_NeHadIso + el_PhIso - rho * eA)) / gsf_el->pt();
+          double el_pfRelIso = (el_ChHadIso + max(0., el_NeHadIso + el_PhIso - rho * eA)) / elec->pt();
 
           //Only TightId
           if (eMult == 0) {  // Restricted to the leading tight electron
@@ -412,10 +411,10 @@ namespace SingleTopTChannelLepton {
 
           // TightId and TightIso
           if (eMultIso == 0) {  //Only leading
-            e = *gsf_el;
-            fill("elecPt_", gsf_el->pt());
-            fill("elecEta_", gsf_el->eta());
-            fill("elecPhi_", gsf_el->phi());
+            e = *elec;
+            fill("elecPt_", elec->pt());
+            fill("elecEta_", elec->eta());
+            fill("elecPhi_", elec->phi());
           }
           ++eMultIso;
         }
@@ -435,18 +434,17 @@ namespace SingleTopTChannelLepton {
     // fill monitoring plots for muons
     unsigned int mMult = 0, mTight = 0, mTightId = 0;
 
-    edm::Handle<edm::View<reco::PFCandidate>> muons;
-    edm::View<reco::PFCandidate>::const_iterator muonit;
-    reco::MuonRef muon;
+    edm::Handle<edm::View<reco::Muon>> muons;
+    edm::View<reco::Muon>::const_iterator muon;
+    //reco::MuonRef muon;
     reco::Muon mu;
 
     if (!event.getByToken(muons_, muons))
       return;
 
-    for (edm::View<reco::PFCandidate>::const_iterator muonit = muons->begin(); muonit != muons->end(); ++muonit) {
-      if (muonit->muonRef().isNull())
-        continue;
-      reco::MuonRef muon = muonit->muonRef();
+    for (edm::View<reco::Muon>::const_iterator muon = muons->begin(); muon != muons->end(); ++muon) {
+    
+      //reco::MuonRef muon = muonit->muonRef();
 
       // restrict to globalMuons
       if (muon->isGlobalMuon()) {
@@ -454,7 +452,7 @@ namespace SingleTopTChannelLepton {
         fill("muonDelXY_", muon->innerTrack()->vx(), muon->innerTrack()->vy());
 
         // apply preselection
-        if ((!muonSelect_ || (*muonSelect_)(*muonit))) {
+        if ((!muonSelect_ || (*muonSelect_)(*muon))) {
           mMult++;
           double chHadPt = muon->pfIsolationR04().sumChargedHadronPt;
           double neHadEt = muon->pfIsolationR04().sumNeutralHadronEt;
@@ -503,9 +501,9 @@ namespace SingleTopTChannelLepton {
   */
 
     // check availability of the btaggers
-    edm::Handle<reco::JetTagCollection> btagEff, btagPur, btagVtx, btagCSV;
+    edm::Handle<reco::JetTagCollection> btagEff, btagPur, btagVtx, btagPNet;
     if (includeBTag_) {
-      if (!event.getByToken(btagCSV_, btagCSV))
+      if (!event.getByToken(btagPNet_, btagPNet))
         return;
     }
 
@@ -532,7 +530,7 @@ namespace SingleTopTChannelLepton {
     std::vector<reco::Jet> correctedJets;
     std::vector<double> JetTagValues;
     reco::Jet TaggedJetCand;
-    unsigned int mult = 0, multLoose = 0, multCSV = 0;
+    unsigned int mult = 0, multLoose = 0, multPNet = 0;
     vector<double> bJetDiscVal;
 
     edm::Handle<edm::View<reco::Jet>> jets;
@@ -572,19 +570,22 @@ namespace SingleTopTChannelLepton {
         if (includeBTag_) {
           // fill b-discriminators
           edm::RefToBase<reco::Jet> jetRef = jets->refAt(idx);
-          fill("jetBCSV_", (*btagCSV)[jetRef]);
-          if ((*btagCSV)[jetRef] > btagCSVWP_) {
-            if (multCSV == 0) {
+          // Convert PFJet reference to a Jet reference
+          //edm::RefToBase<reco::Jet> jetRef(pfjetRef.castTo<edm::Ref<reco::PFJetCollection> >());
+
+          fill("jetBPNet_", (*btagPNet)[jetRef]);
+          if ((*btagPNet)[jetRef] > btagPNetWP_) {
+            if (multPNet == 0) {
               TaggedJetCand = monitorJet;
-              bJetDiscVal.push_back((*btagCSV)[jetRef]);
-            } else if (multCSV == 1) {
-              bJetDiscVal.push_back((*btagCSV)[jetRef]);
+              bJetDiscVal.push_back((*btagPNet)[jetRef]);
+            } else if (multPNet == 1) {
+              bJetDiscVal.push_back((*btagPNet)[jetRef]);
               if (bJetDiscVal[1] > bJetDiscVal[0])
                 TaggedJetCand = monitorJet;
             }
-            ++multCSV;
+            ++multPNet;
           }
-          JetTagValues.push_back((*btagCSV)[jetRef]);
+          JetTagValues.push_back((*btagPNet)[jetRef]);
         }
 
         // fill pt/eta for the leading four jets
@@ -601,7 +602,7 @@ namespace SingleTopTChannelLepton {
     }
     fill("jetMult_", mult);
     fill("jetMultLoose_", multLoose);
-    fill("jetMultBCSVM_", multCSV);
+    fill("jetMultBPNetM_", multPNet);
 
     /*
   ------------------------------------------------------------
@@ -612,10 +613,10 @@ namespace SingleTopTChannelLepton {
   */
 
     // fill monitoring histograms for met
-    reco::MET mET;
-    for (std::vector<edm::EDGetTokenT<edm::View<reco::MET>>>::const_iterator met_ = mets_.begin(); met_ != mets_.end();
+    reco::PFMET mET;
+    for (std::vector<edm::EDGetTokenT<edm::View<reco::PFMET>>>::const_iterator met_ = mets_.begin(); met_ != mets_.end();
          ++met_) {
-      edm::Handle<edm::View<reco::MET>> met;
+      edm::Handle<edm::View<reco::PFMET>> met;
       if (!event.getByToken(*met_, met))
         continue;
       if (met->begin() != met->end()) {
@@ -666,14 +667,14 @@ namespace SingleTopTChannelLepton {
         ++logged_;
       }
     }
-    if (multCSV != 0 && mTight == 1) {
+    if (multPNet != 0 && mTight == 1) {
       double mtW = eventKinematics.tmassWBoson(&mu, mET, TaggedJetCand);
       fill("MTWm_", mtW);
       double MTT = eventKinematics.tmassTopQuark(&mu, mET, TaggedJetCand);
       fill("mMTT_", MTT);
     }
 
-    if (multCSV != 0 && eMultIso == 1) {
+    if (multPNet != 0 && eMultIso == 1) {
       double mtW = eventKinematics.tmassWBoson(&e, mET, TaggedJetCand);
       fill("MTWe_", mtW);
       double MTT = eventKinematics.tmassTopQuark(&e, mET, TaggedJetCand);
@@ -692,7 +693,7 @@ SingleTopTChannelLeptonDQM::SingleTopTChannelLeptonDQM(const edm::ParameterSet& 
       PFElectronStep(nullptr),
       PvStep(nullptr),
       METStep(nullptr) {
-  JetSteps.clear();
+  //JetSteps.clear();
   CaloJetSteps.clear();
   PFJetSteps.clear();
   // configure preselection
@@ -732,13 +733,13 @@ SingleTopTChannelLeptonDQM::SingleTopTChannelLeptonDQM(const edm::ParameterSet& 
         MuonStep = std::make_unique<SelectionStep<reco::Muon>>(selection_[key].first, consumesCollector());
       }
       if (type == "muons/pf") {
-        PFMuonStep = std::make_unique<SelectionStep<reco::PFCandidate>>(selection_[key].first, consumesCollector());
+        PFMuonStep = std::make_unique<SelectionStep<reco::Muon>>(selection_[key].first, consumesCollector());
       }
       if (type == "elecs") {
         ElectronStep = std::make_unique<SelectionStep<reco::GsfElectron>>(selection_[key].first, consumesCollector());
       }
       if (type == "elecs/pf") {
-        PFElectronStep = std::make_unique<SelectionStep<reco::PFCandidate>>(selection_[key].first, consumesCollector());
+        PFElectronStep = std::make_unique<SelectionStep<reco::GsfElectron>>(selection_[key].first, consumesCollector());
       }
       if (type == "pvs") {
         PvStep = std::make_unique<SelectionStep<reco::Vertex>>(selection_[key].first, consumesCollector());
@@ -754,7 +755,7 @@ SingleTopTChannelLeptonDQM::SingleTopTChannelLeptonDQM(const edm::ParameterSet& 
             std::make_unique<SelectionStep<reco::CaloJet>>(selection_[key].first, consumesCollector()));
       }
       if (type == "met") {
-        METStep = std::make_unique<SelectionStep<reco::MET>>(selection_[key].first, consumesCollector());
+        METStep = std::make_unique<SelectionStep<reco::PFMET>>(selection_[key].first, consumesCollector());
       }
     }
   }
@@ -780,7 +781,7 @@ void SingleTopTChannelLeptonDQM::analyze(const edm::Event& event, const edm::Eve
       return;
   }
   // apply selection steps
-  unsigned int nJetSteps = -1;
+  //unsigned int nJetSteps = -1;
   unsigned int nPFJetSteps = -1;
   unsigned int nCaloJetSteps = -1;
   for (std::vector<std::string>::const_iterator selIt = selectionOrder_.begin(); selIt != selectionOrder_.end();
@@ -818,7 +819,7 @@ void SingleTopTChannelLeptonDQM::analyze(const edm::Event& event, const edm::Eve
         } else
           break;
       }
-      if (type == "jets") {
+      /*if (type == "jets") {
         nJetSteps++;
         if (JetSteps[nJetSteps]) {
           if (JetSteps[nJetSteps]->select(event, setup)) {
@@ -826,7 +827,7 @@ void SingleTopTChannelLeptonDQM::analyze(const edm::Event& event, const edm::Eve
           } else
             break;
         }
-      }
+      }*/
       if (type == "jets/pf") {
         nPFJetSteps++;
         if (PFJetSteps[nPFJetSteps]) {

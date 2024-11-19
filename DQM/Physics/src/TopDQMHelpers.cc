@@ -28,19 +28,19 @@ double Calculate::massBTopQuark(const std::vector<reco::Jet>& jets, std::vector<
   return massBTopQuark_;
 }
 
-double Calculate::tmassWBoson(reco::RecoCandidate* mu, const reco::MET& met, const reco::Jet& b) {
+double Calculate::tmassWBoson(reco::RecoCandidate* mu, const reco::PFMET& met, const reco::Jet& b) {
   if (tmassWBoson_ < 0)
     operator()(b, mu, met);
   return tmassWBoson_;
 }
 
-double Calculate::tmassTopQuark(reco::RecoCandidate* lepton, const reco::MET& met, const reco::Jet& b) {
+double Calculate::tmassTopQuark(reco::RecoCandidate* lepton, const reco::PFMET& met, const reco::Jet& b) {
   if (tmassTopQuark_ < 0)
     operator()(b, lepton, met);
   return tmassTopQuark_;
 }
 
-void Calculate::operator()(const reco::Jet& bJet, reco::RecoCandidate* lepton, const reco::MET& met) {
+void Calculate::operator()(const reco::Jet& bJet, reco::RecoCandidate* lepton, const reco::PFMET& met) {
   double metT = sqrt(pow(met.px(), 2) + pow(met.py(), 2));
   double lepT = sqrt(pow(lepton->px(), 2) + pow(lepton->py(), 2));
   double bT = sqrt(pow(bJet.px(), 2) + pow(bJet.py(), 2));

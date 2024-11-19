@@ -142,9 +142,9 @@ public:
   double massBTopQuark(const std::vector<reco::Jet>& jets, std::vector<double> VbtagWP, double btagWP_);
 
   /// calculate W boson transverse mass estimate
-  double tmassWBoson(reco::RecoCandidate* lep, const reco::MET& met, const reco::Jet& b);
+  double tmassWBoson(reco::RecoCandidate* lep, const reco::PFMET& met, const reco::Jet& b);
   /// calculate top quark transverse mass estimate
-  double tmassTopQuark(reco::RecoCandidate* lep, const reco::MET& met, const reco::Jet& b);
+  double tmassTopQuark(reco::RecoCandidate* lep, const reco::PFMET& met, const reco::Jet& b);
 
 private:
   /// do the calculation; this is called only once per event by the first
@@ -154,7 +154,7 @@ private:
   /// do the calculation of the t-quark mass with one b-jet
   void operator2(const std::vector<reco::Jet>&, std::vector<double>, double);
   /// do the calculation of the transverse top and W masses
-  void operator()(const reco::Jet& bJet, reco::RecoCandidate* lepton, const reco::MET& met);
+  void operator()(const reco::Jet& bJet, reco::RecoCandidate* lepton, const reco::PFMET& met);
 
 private:
   /// indicate failed associations
@@ -378,17 +378,16 @@ bool SelectionStep<Object>::select(const edm::Event& event, const std::string& t
     if (dynamic_cast<const reco::PFCandidate*>(&*obj)) {
       reco::PFCandidate objtmp = dynamic_cast<const reco::PFCandidate&>(*obj);
 
-      if (objtmp.muonRef().isNonnull() && type == "muon") {
+      if ( type == "muon") {
         if (select_(*obj)) {
           ++n;
         }
-      } else if (objtmp.gsfElectronRef().isNonnull() && type == "electron") {
+      } else if (type == "electron") {
         if (select_(*obj)) {
-          if (electronId_.isUninitialized()) {
+          /*if (electronId_.isUninitialized()) {
             ++n;
-          } else if (((double)(*electronId)[obj->gsfElectronRef()] >= eidCutValue_)) {
+          } else if (((double)(*electronId)[obj->gsfElectronRef()] >= eidCutValue_)) {*/
             ++n;
-          }
         }
         //        idx_gsf++;
       }
