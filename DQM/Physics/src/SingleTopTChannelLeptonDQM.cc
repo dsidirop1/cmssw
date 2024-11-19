@@ -570,8 +570,6 @@ namespace SingleTopTChannelLepton {
         if (includeBTag_) {
           // fill b-discriminators
           edm::RefToBase<reco::Jet> jetRef = jets->refAt(idx);
-          // Convert PFJet reference to a Jet reference
-          //edm::RefToBase<reco::Jet> jetRef(pfjetRef.castTo<edm::Ref<reco::PFJetCollection> >());
 
           fill("jetBPNet_", (*btagPNet)[jetRef]);
           if ((*btagPNet)[jetRef] > btagPNetWP_) {
