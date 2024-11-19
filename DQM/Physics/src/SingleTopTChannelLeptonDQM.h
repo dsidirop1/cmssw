@@ -178,10 +178,10 @@ namespace SingleTopTChannelLepton {
     bool includeBTag_;
     /// btag discriminator labels
     //    edm::InputTag btagEff_, btagPur_, btagVtx_, btagCombVtx_;
-    edm::EDGetTokenT<reco::JetTagCollection> btagEff_, btagPur_, btagVtx_, btagPNet_, btagCombVtx_;
+    edm::EDGetTokenT<reco::JetTagCollection> btagEff_, btagPur_, btagVtx_, btagCSV_, btagCombVtx_;
 
     /// btag working points
-    double btagEffWP_, btagPurWP_, btagVtxWP_, btagPNetWP_, btagCombVtxWP_;
+    double btagEffWP_, btagPurWP_, btagVtxWP_, btagCSVWP_, btagCombVtxWP_;
     /// mass window upper and lower edge
     double lowerEdge_, upperEdge_;
 

@@ -4,7 +4,7 @@
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
-#include "DataFormats/JetReco/interface/PFJetCollection.h"
+
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -45,8 +45,7 @@ namespace SingleTopTChannelLepton {
         logged_(0) {
     // sources have to be given; this PSet is not optional
     edm::ParameterSet sources = cfg.getParameter<edm::ParameterSet>("sources");
-    muons_ = iC.consumes<edm::View<reco::Muon>>(sources.getParameter<edm::InputTag>("muons"));
-    elecs_ = iC.consumes<edm::View<reco::GsfElectron>>(sources.getParameter<edm::InputTag>("elecs"));
+    muons_ = iC.consumes<edm::View<reco::Muon>>(sources.getParameter<edm::InputTag>("muons"));    elecs_ = iC.consumes<edm::View<reco::GsfElectron>>(sources.getParameter<edm::InputTag>("elecs"));
     jets_ = iC.consumes<edm::View<reco::Jet>>(sources.getParameter<edm::InputTag>("jets"));
     for (edm::InputTag const& tag : sources.getParameter<std::vector<edm::InputTag>>("mets"))
       mets_.push_back(iC.consumes<edm::View<reco::PFMET>>(tag));
@@ -139,10 +138,10 @@ namespace SingleTopTChannelLepton {
       // corresponding working points
       includeBTag_ = jetExtras.existsAs<edm::ParameterSet>("jetBTaggers");
       if (includeBTag_) {
-        edm::ParameterSet btagPNet =
+        edm::ParameterSet btagCSV =
         jetExtras.getParameter<edm::ParameterSet>("jetBTaggers").getParameter<edm::ParameterSet>("cvsVertex");
-        btagPNet_ = iC.consumes<reco::JetTagCollection>(btagPNet.getParameter<edm::InputTag>("label"));
-        btagPNetWP_ = btagPNet.getParameter<double>("workingPoint");
+        btagCSV_ = iC.consumes<reco::JetTagCollection>(btagCSV.getParameter<edm::InputTag>("label"));
+        btagCSVWP_ = btagCSV.getParameter<double>("workingPoint");
       }
     }
 
@@ -282,9 +281,9 @@ namespace SingleTopTChannelLepton {
     hists_["elecPhIso_"] = ibooker.book1D("ElectronPhIsoComp", "Photon_{IsoComponent}(e tightId)", 50, 0., 5.);
 
     // multiplicity for combined secondary vertex
-    hists_["jetMultBPNetM_"] = ibooker.book1D("JetMultBPNetM", "N_{30}(PNetM)", 10, 0., 10.);
+    hists_["jetMultBCSVM_"] = ibooker.book1D("JetMultBCSVM", "N_{30}(CSVM)", 10, 0., 10.);
     // btag discriminator for combined secondary vertex
-    hists_["jetBPNet_"] = ibooker.book1D("JetDiscPNet", "BJet Disc_{PNet}(JET)", 100, -1., 2.);
+    hists_["jetBCSV_"] = ibooker.book1D("JetDiscCSV", "BJet Disc_{CSV}(JET)", 100, -1., 2.);
     // pt of the 1. leading jet (uncorrected)
     // hists_["jet1PtRaw_"] = ibooker.book1D("Jet1PtRaw", "pt_{Raw}(jet1)", 60, 0., 300.);
     // pt of the 2. leading jet (uncorrected)
@@ -501,9 +500,9 @@ namespace SingleTopTChannelLepton {
   */
 
     // check availability of the btaggers
-    edm::Handle<reco::JetTagCollection> btagEff, btagPur, btagVtx, btagPNet;
+    edm::Handle<reco::JetTagCollection> btagEff, btagPur, btagVtx, btagCSV;
     if (includeBTag_) {
-      if (!event.getByToken(btagPNet_, btagPNet))
+      if (!event.getByToken(btagCSV_, btagCSV))
         return;
     }
 
@@ -530,7 +529,7 @@ namespace SingleTopTChannelLepton {
     std::vector<reco::Jet> correctedJets;
     std::vector<double> JetTagValues;
     reco::Jet TaggedJetCand;
-    unsigned int mult = 0, multLoose = 0, multPNet = 0;
+    unsigned int mult = 0, multLoose = 0, multCSV = 0;
     vector<double> bJetDiscVal;
 
     edm::Handle<edm::View<reco::Jet>> jets;
@@ -571,19 +570,19 @@ namespace SingleTopTChannelLepton {
           // fill b-discriminators
           edm::RefToBase<reco::Jet> jetRef = jets->refAt(idx);
 
-          fill("jetBPNet_", (*btagPNet)[jetRef]);
-          if ((*btagPNet)[jetRef] > btagPNetWP_) {
-            if (multPNet == 0) {
+          fill("jetBCSV_", (*btagCSV)[jetRef]);
+          if ((*btagCSV)[jetRef] > btagCSVWP_) {
+            if (multCSV == 0) {
               TaggedJetCand = monitorJet;
-              bJetDiscVal.push_back((*btagPNet)[jetRef]);
-            } else if (multPNet == 1) {
-              bJetDiscVal.push_back((*btagPNet)[jetRef]);
+              bJetDiscVal.push_back((*btagCSV)[jetRef]);
+            } else if (multCSV == 1) {
+              bJetDiscVal.push_back((*btagCSV)[jetRef]);
               if (bJetDiscVal[1] > bJetDiscVal[0])
                 TaggedJetCand = monitorJet;
             }
-            ++multPNet;
+            ++multCSV;
           }
-          JetTagValues.push_back((*btagPNet)[jetRef]);
+          JetTagValues.push_back((*btagCSV)[jetRef]);
         }
 
         // fill pt/eta for the leading four jets
@@ -600,7 +599,7 @@ namespace SingleTopTChannelLepton {
     }
     fill("jetMult_", mult);
     fill("jetMultLoose_", multLoose);
-    fill("jetMultBPNetM_", multPNet);
+    fill("jetMultBCSVM_", multCSV);
 
     /*
   ------------------------------------------------------------
@@ -665,14 +664,14 @@ namespace SingleTopTChannelLepton {
         ++logged_;
       }
     }
-    if (multPNet != 0 && mTight == 1) {
+    if (multCSV != 0 && mTight == 1) {
       double mtW = eventKinematics.tmassWBoson(&mu, mET, TaggedJetCand);
       fill("MTWm_", mtW);
       double MTT = eventKinematics.tmassTopQuark(&mu, mET, TaggedJetCand);
       fill("mMTT_", MTT);
     }
 
-    if (multPNet != 0 && eMultIso == 1) {
+    if (multCSV != 0 && eMultIso == 1) {
       double mtW = eventKinematics.tmassWBoson(&e, mET, TaggedJetCand);
       fill("MTWe_", mtW);
       double MTT = eventKinematics.tmassTopQuark(&e, mET, TaggedJetCand);
