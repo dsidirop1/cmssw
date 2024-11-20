@@ -206,7 +206,7 @@ namespace TopSingleLepton {
     // multiplicity of jets with pt>30
     hists_["jetMult_"] = ibooker.book1D("JetMult", "N_{30}(jet)", 10, 0., 10.);
     // multiplicity of loose jets with pt>30
-    hists_["jetMultLoose_"] = ibooker.book1D("JetMultLoose", "N_{30, loose}(jet)", 10, 0., 10.);
+    hists_["jetMultLoose_"] = ibooker.book1D("JetMultLoose", "N_{30,loose}(jet)", 10, 0., 10.);
 
     // trigger efficiency estimates for single lepton triggers
     // hists_["triggerEff_"] = ibooker.book1D("TriggerEff",
@@ -357,7 +357,6 @@ namespace TopSingleLepton {
         pvMult++;
     }
     fill("pvMult_", pvMult);
-
     /*
   ------------------------------------------------------------
 
@@ -376,10 +375,10 @@ namespace TopSingleLepton {
     // check availability of electron id
     edm::Handle<edm::ValueMap<float>> electronId;
     if (!electronId_.isUninitialized()) {
-      if (!event.getByToken(electronId_, electronId))
+      if (!event.getByToken(electronId_, electronId)) {
         return;
+      }
     }
-
     // loop electron collection
     unsigned int eMult = 0, eMultIso = 0;
     std::vector<const reco::GsfElectron*> isoElecs;
@@ -556,7 +555,6 @@ namespace TopSingleLepton {
         if (!(*jetSelection_)(sel))
           continue;
       }
-
       // prepare jet to fill monitor histograms
       reco::Jet monitorJet = *jet;
 
@@ -617,8 +615,9 @@ namespace TopSingleLepton {
         continue;
       if (met->begin() != met->end()) {  //If we ever have to use more than one type of met again
         unsigned int idx = met_ - mets_.begin();
-        if (idx == 0)
+        if (idx == 0) {
           fill("metPflow_", met->begin()->et());
+        }
       }
     }
 
@@ -631,7 +630,6 @@ namespace TopSingleLepton {
   */
 
     // fill W boson and top mass estimates
-
     Calculate eventKinematics(MAXJETS, WMASS);
     double wMass = eventKinematics.massWBoson(correctedJets);
     double topMass = eventKinematics.massTopQuark(correctedJets);
@@ -764,7 +762,7 @@ void TopSingleLeptonDQM::analyze(const edm::Event& event, const edm::EventSetup&
     if (!(*beamspotSelect_)(*beamspot)){
       return;}
   }
-
+  // apply selection steps
   unsigned int nJetSteps = -1;
   unsigned int nPFJetSteps = -1;
   unsigned int nCaloJetSteps = -1;
@@ -837,8 +835,3 @@ void TopSingleLeptonDQM::analyze(const edm::Event& event, const edm::EventSetup&
     }
   }
 }
-
-// Local Variables:
-// show-trailing-whitespace: t
-// truncate-lines: t
-// End:

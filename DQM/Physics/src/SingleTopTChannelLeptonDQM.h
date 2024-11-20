@@ -110,7 +110,7 @@ namespace SingleTopTChannelLepton {
     /// instance label
     std::string label_;
     /// considers a vector of METs
-    std::vector<edm::EDGetTokenT<edm::View<reco::PFMET> > > mets_;
+    std::vector<edm::EDGetTokenT<edm::View<reco::MET> > > mets_;
     //    std::vector<edm::InputTag> mets_;
     /// input sources for monitoring
     edm::EDGetTokenT<edm::View<reco::Jet> > jets_;
@@ -260,7 +260,7 @@ namespace SingleTopTChannelLepton {
    (jets/pflow)
     - elecs : of type reco::GsfElectron
     - muons : of type reco::Muon
-    - met   : of type reco::PFMET
+    - met   : of type reco::MET
 
    These types have to be present as prefix of the selection step paramter
    _label_ separated from the rest of the label by a ':' (e.g. in the form
@@ -333,7 +333,7 @@ private:
   std::vector<std::unique_ptr<SelectionStep<reco::CaloJet> > > CaloJetSteps;
   std::vector<std::unique_ptr<SelectionStep<reco::PFJet> > > PFJetSteps;
 
-  std::unique_ptr<SelectionStep<reco::PFMET> > METStep;
+  std::unique_ptr<SelectionStep<reco::MET> > METStep;
   std::vector<edm::ParameterSet> sel;
 };
 

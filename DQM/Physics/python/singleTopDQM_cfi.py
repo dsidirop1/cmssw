@@ -62,7 +62,6 @@ singleTopMuonMediumDQM = DQMEDAnalyzer('SingleTopTChannelLeptonDQM',
       select = cms.string("pt>30 & abs(eta)< 2.4"),
       jetBTaggers  = cms.PSet(
       	cvsVertex = cms.PSet(
-      	#label = cms.InputTag("pfCombinedInclusiveSecondaryVertexV2BJetTags"),
           label = cms.InputTag("pfDeepCSVJetTags:probb"),
 	    	  workingPoint = cms.double(0.4168)
         )
@@ -88,7 +87,7 @@ singleTopMuonMediumDQM = DQMEDAnalyzer('SingleTopTChannelLeptonDQM',
   selection = cms.VPSet(
     cms.PSet(
       label  = cms.string("muons/pf:step0"),
-      src    = cms.InputTag("pfIsolatedMuonsEI"),
+      src    = cms.InputTag("muons"),
       select = cms.string(tightMuonCut + " && pt>20 & abs(eta)<2.4"),
       min    = cms.int32(1),
     ),
@@ -119,7 +118,7 @@ singleTopElectronMediumDQM = DQMEDAnalyzer('SingleTopTChannelLeptonDQM',
     ## communication to TopCom!
     directory = cms.string("Physics/Top/SingleTopElectronMediumDQM/"),
     sources = cms.PSet(
-    muons = cms.InputTag("Muons"),
+    muons = cms.InputTag("muons"),
     elecs = cms.InputTag("gedGsfElectrons"),
     jets  = cms.InputTag("ak4PFJetsCHS"),
     mets  = cms.VInputTag("pfMet"),
@@ -144,7 +143,6 @@ singleTopElectronMediumDQM = DQMEDAnalyzer('SingleTopTChannelLeptonDQM',
       select = cms.string("pt>30 & abs(eta)< 2.4"),
       jetBTaggers  = cms.PSet(
       	cvsVertex = cms.PSet(
-      	#label = cms.InputTag("pfCombinedInclusiveSecondaryVertexV2BJetTags"),
           label = cms.InputTag("pfDeepCSVJetTags:probb"),
 	    	  workingPoint = cms.double(0.4168)
         )
@@ -183,7 +181,7 @@ singleTopElectronMediumDQM = DQMEDAnalyzer('SingleTopTChannelLeptonDQM',
 #    ),*/
     cms.PSet(
       label  = cms.string("elecs/pf:step0"),
-      src    = cms.InputTag("pfIsolatedElectronsEI"),
+      src    = cms.InputTag("gedGsfElectrons"),
       select = cms.string("pt>20 & abs(eta)<2.5 & (abs(superCluster().eta()) <= 1.4442 || abs(superCluster().eta()) >= 1.5660) &&" + tightEleCut),  
       min    = cms.int32(1),
     ),
