@@ -605,9 +605,10 @@ namespace SingleTopTChannelLepton_miniAOD {
 
         //ParticleNet discriminator
         
-        double discriminator = monitorJet.bDiscriminator("pfParticleNetFromMiniAODAK4CHSCentralDiscriminatorsJetTags:BvsAll") > 0 
-		? monitorJet.bDiscriminator("pfParticleNetFromMiniAODAK4CHSCentralDiscriminatorsJetTags:BvsAll") 
-		: -1;
+        double discriminator =
+            monitorJet.bDiscriminator("pfParticleNetFromMiniAODAK4CHSCentralDiscriminatorsJetTags:BvsAll") > 0
+		            ? monitorJet.bDiscriminator("pfParticleNetFromMiniAODAK4CHSCentralDiscriminatorsJetTags:BvsAll")
+		            : -1;
 
         fill("jetBPNet_", discriminator);  //hard coded discriminator and value right now.
         if (discriminator > 0.1919) {

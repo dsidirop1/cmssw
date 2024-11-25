@@ -75,10 +75,10 @@ process.p      = cms.Path(
     #process.topSingleMuonMediumDQM     +
 #    process.EIsequence * 
     process.jetCorrectorsSeq * process.dqmAk4PFCHSL1FastL2L3CorrectorChain *
-    #process.topSingleMuonMediumDQM     +
+    process.topSingleMuonMediumDQM      +
     #process.topSingleElectronLooseDQM  +
     #process.ak4PFCHSL1FastL2L3CorrectorChain * 
-    #process.topSingleElectronMediumDQM #+
+    process.topSingleElectronMediumDQM  +
     #process.ak4PFCHSL1FastL2L3CorrectorChain * 
     process.singleTopMuonMediumDQM      +
     #process.ak4PFCHSL1FastL2L3CorrectorChain * 

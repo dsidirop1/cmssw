@@ -45,7 +45,8 @@ namespace SingleTopTChannelLepton {
         logged_(0) {
     // sources have to be given; this PSet is not optional
     edm::ParameterSet sources = cfg.getParameter<edm::ParameterSet>("sources");
-    muons_ = iC.consumes<edm::View<reco::Muon>>(sources.getParameter<edm::InputTag>("muons"));    elecs_ = iC.consumes<edm::View<reco::GsfElectron>>(sources.getParameter<edm::InputTag>("elecs"));
+    muons_ = iC.consumes<edm::View<reco::Muon>>(sources.getParameter<edm::InputTag>("muons"));
+    elecs_ = iC.consumes<edm::View<reco::GsfElectron>>(sources.getParameter<edm::InputTag>("elecs"));
     jets_ = iC.consumes<edm::View<reco::Jet>>(sources.getParameter<edm::InputTag>("jets"));
     for (edm::InputTag const& tag : sources.getParameter<std::vector<edm::InputTag>>("mets"))
       mets_.push_back(iC.consumes<edm::View<reco::MET>>(tag));
@@ -92,14 +93,14 @@ namespace SingleTopTChannelLepton {
       // select is optional; in case it's not found no
       // selection will be applied
       if (muonExtras.existsAs<std::string>("select")) {
-        muonSelect_ = std::make_unique<StringCutObjectSelector<reco::Muon>>(
-            muonExtras.getParameter<std::string>("select"));
+        muonSelect_ =
+            std::make_unique<StringCutObjectSelector<reco::Muon>>(muonExtras.getParameter<std::string>("select"));
       }
       // isolation is optional; in case it's not found no
       // isolation will be applied
       if (muonExtras.existsAs<std::string>("isolation")) {
-        muonIso_ = std::make_unique<StringCutObjectSelector<reco::Muon>>(
-            muonExtras.getParameter<std::string>("isolation"));
+        muonIso_ =
+            std::make_unique<StringCutObjectSelector<reco::Muon>>(muonExtras.getParameter<std::string>("isolation"));
       }
     }
 
@@ -585,27 +586,19 @@ namespace SingleTopTChannelLepton {
         // fill pt/eta for the leading four jets
         if (multLoose == 0) {
           fill("jet1Pt_", monitorJet.pt());
-          cout << "jet 1 pt: " << monitorJet.pt() << endl;
           fill("jet1Eta_", monitorJet.eta());
-          cout << "jet 1 eta: " << monitorJet.eta() << endl;
         };
         if (multLoose == 1) {
           fill("jet2Pt_", monitorJet.pt());
-          cout << "jet 2 pt: " << monitorJet.pt() << endl;
           fill("jet2Eta_", monitorJet.eta());
-          cout << "jet 2 eta: " << monitorJet.eta() << endl;
         };
         if (multLoose == 2) {
           fill("jet3Pt_", monitorJet.pt());
-          cout << "jet 3 pt: " << monitorJet.pt() << endl;
           fill("jet3Eta_", monitorJet.eta());
-          cout << "jet 3 eta: " << monitorJet.eta() << endl;
         };
         if (multLoose == 3) {
           fill("jet4Pt_", monitorJet.pt());
-          cout << "jet 4 pt: " << monitorJet.pt() << endl;
           fill("jet4Eta_", monitorJet.eta());
-          cout << "jet 4 eta: " << monitorJet.eta() << endl;
         };
         multLoose++;
       }
@@ -741,14 +734,12 @@ SingleTopTChannelLeptonDQM::SingleTopTChannelLeptonDQM(const edm::ParameterSet& 
 
       if (type == "muons") {
         MuonStep = std::make_unique<SelectionStep<reco::Muon>>(selection_[key].first, consumesCollector());
-        cout << "In muons" << endl;
       }
       if (type == "muons/pf") {
         PFMuonStep = std::make_unique<SelectionStep<reco::Muon>>(selection_[key].first, consumesCollector());
       }
       if (type == "elecs") {
         ElectronStep = std::make_unique<SelectionStep<reco::GsfElectron>>(selection_[key].first, consumesCollector());
-        cout << "In electrons" << endl;
       }
       if (type == "elecs/pf") {
         PFElectronStep = std::make_unique<SelectionStep<reco::GsfElectron>>(selection_[key].first, consumesCollector());
@@ -758,11 +749,9 @@ SingleTopTChannelLeptonDQM::SingleTopTChannelLeptonDQM(const edm::ParameterSet& 
       }
       if (type == "jets") {
         JetSteps.push_back(std::make_unique<SelectionStep<reco::Jet>>(selection_[key].first, consumesCollector()));
-        cout << "In jets" << endl;
       }
       if (type == "jets/pf") {
         PFJetSteps.push_back(std::make_unique<SelectionStep<reco::PFJet>>(selection_[key].first, consumesCollector()));
-        cout << "In pf jets" << endl;
       }
       if (type == "jets/calo") {
         CaloJetSteps.push_back(
@@ -770,7 +759,6 @@ SingleTopTChannelLeptonDQM::SingleTopTChannelLeptonDQM(const edm::ParameterSet& 
       }
       if (type == "met") {
         METStep = std::make_unique<SelectionStep<reco::MET>>(selection_[key].first, consumesCollector());
-        cout << "In MET" << endl;
       }
     }
   }
@@ -783,17 +771,21 @@ void SingleTopTChannelLeptonDQM::bookHistograms(DQMStore::IBooker& ibooker, edm:
 void SingleTopTChannelLeptonDQM::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   if (!triggerTable__.isUninitialized()) {
     edm::Handle<edm::TriggerResults> triggerTable;
-    if (!event.getByToken(triggerTable__, triggerTable)){
-      return;}
-    if (!accept(event, *triggerTable, triggerPaths_)){
-      return;}
+    if (!event.getByToken(triggerTable__, triggerTable)) {
+      return;
+    }
+    if (!accept(event, *triggerTable, triggerPaths_)) {
+      return;
+    }
   }
   if (!beamspot__.isUninitialized()) {
     edm::Handle<reco::BeamSpot> beamspot;
-    if (!event.getByToken(beamspot__, beamspot)){
-      return;}
-    if (!(*beamspotSelect_)(*beamspot)){
-      return;}
+    if (!event.getByToken(beamspot__, beamspot)) {
+      return;
+    }
+    if (!(*beamspotSelect_)(*beamspot)) {
+      return;
+    }
   }
   // apply selection steps
   //unsigned int nJetSteps = -1;
@@ -813,7 +805,6 @@ void SingleTopTChannelLeptonDQM::analyze(const edm::Event& event, const edm::Eve
         if (ElectronStep->select(event)) {
           selection_[key].second->fill(event, setup);
         } else {
-          cout << "No electron found." << endl;
           break;
         }
       }
@@ -822,7 +813,6 @@ void SingleTopTChannelLeptonDQM::analyze(const edm::Event& event, const edm::Eve
           selection_[key].second->fill(event, setup);
 
         } else {
-          cout << "No pf electron found." << endl;
           break;
         }
       }
@@ -830,7 +820,6 @@ void SingleTopTChannelLeptonDQM::analyze(const edm::Event& event, const edm::Eve
         if (MuonStep->select(event)) {
           selection_[key].second->fill(event, setup);
         } else {
-          cout << "No muon found." << endl;
           break;
         }
       }
@@ -838,7 +827,6 @@ void SingleTopTChannelLeptonDQM::analyze(const edm::Event& event, const edm::Eve
         if (PFMuonStep->select(event, "muon")) {
           selection_[key].second->fill(event, setup);
         } else {
-          cout << "No pf muons found." << endl;
           break;
         }
       }
@@ -858,7 +846,6 @@ void SingleTopTChannelLeptonDQM::analyze(const edm::Event& event, const edm::Eve
           if (PFJetSteps[nPFJetSteps]->select(event, setup)) {
             selection_[key].second->fill(event, setup);
           } else {
-            cout << "No pf jets found" << endl;
             break;
           }
         }
@@ -877,7 +864,6 @@ void SingleTopTChannelLeptonDQM::analyze(const edm::Event& event, const edm::Eve
         if (METStep->select(event)) {
           selection_[key].second->fill(event, setup);
         } else {
-          cout << "No MET found." << endl;
           break;
         }
       }
